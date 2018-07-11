@@ -1,0 +1,113 @@
+.. _repeatmodeler:
+
+#############
+RepeatModeler
+#############
+
+RepeatModeler (`link <http://www.repeatmasker.org/RepeatModeler.html>`_)
+
+*version 1.08*
+
+*de novo* repeat family identification and modeling using RECON, RepeatScout,
+:ref:`trf` & RMBlast [*]_ on blast databases formatted with
+:ref:`builddatabase`.
+
+
+******************
+Program parameters
+******************
+
+::
+
+  -database
+      The prefix name of a XDF formatted sequence database containing the
+      genomic sequence to use when building repeat models. The database
+      may be created with the WUBlast "xdformat" utility or with the
+      RepeatModeler wrapper script "BuildXDFDatabase".
+
+  -engine <abblast|wublast|ncbi>
+      The name of the search engine we are using. I.e abblast/wublast or
+      ncbi (rmblast version).
+
+  -pa #
+      Specify the number of shared-memory processors available to this
+      program. RepeatModeler will use the processors to run BLAST searches
+      in parallel. i.e on a machine with 10 cores one might use 1 core for
+      the script and 9 cores for the BLAST searches by running with "-pa
+      9".
+
+  -recoverDir <Previous Output Directory>
+      If a run fails in the middle of processing, it may be possible
+      recover some results and continue where the previous run left off.
+      Simply supply the output directory where the results of the failed
+      run were saved and the program will attempt to recover and continue
+      the run.
+
+
+*************
+Typical usage
+*************
+
+::
+
+  /exports/software/repeatmodeler/RepeatModeler/RepeatModeler -database mydb -engine ncbi -pa 32
+
+
+******************
+Gridengine wrapper
+******************
+
+RepeatModeler will use more threads than defined by ``-pa`` so use ``nice``
+
+repeatmodeler.sh:
+
+.. code-block:: bash
+
+  #!/bin/bash
+
+  #$ -V
+  #$ -cwd
+  #$ -j y
+  #$ -o $JOB_ID.log
+
+  # define $DATADIR and $DATABASE before/when calling this script, e.g.:
+  #       export DATADIR=`pwd`
+  #       qsub -v SEQFILE=seq.fa -v DATABASE=mydb ...
+
+  WORKDIR=/scratch/$USER/repeatmodeler/$JOB_ID
+  mkdir -p $WORKDIR
+  cp $DATADIR/$SEQFILE $WORKDIR
+  cd $WORKDIR
+  /exports/software/repeatmodeler/RepeatModeler/BuildDatabase -engine ncbi -name $DATABASE $SEQFILE
+  nice -n 10 /exports/software/repeatmodeler/RepeatModeler/RepeatModeler -database $DATABASE -engine ncbi -pa $NSLOTS
+  rsync -a ./consensi.fa.classified $DATADIR/$SEQFILE.consensi.fa.classified
+
+
+************
+qsub command
+************
+
+.. code-block:: bash
+
+  export DATADIR=`pwd`
+  qsub -v SEQFILE=seq.fa -v DATABASE=mydb -pe smp 32 /path/to/repeatmodeler.sh
+
+
+*********************
+parallel qsub command
+*********************
+
+Submit a job for each ``.fa`` file in a directory, limit to 2 simultaneous jobs
+to avoid flooding queue.
+
+.. code-block:: bash
+
+  export DATADIR=`pwd`
+  parallel -j 2 qsub -v SEQFILE={} -v DATABASE={.} -pe smp 32 -sync y /path/to/repeatmodeler.sh ::: *.fa
+
+
+*********
+Footnotes
+*********
+
+.. [*] Alternatively ABBlast/WUBlast may be used.
