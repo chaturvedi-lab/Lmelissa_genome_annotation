@@ -12,6 +12,9 @@ RepeatModeler (`link <http://www.repeatmasker.org/RepeatModeler.html>`_)
 :ref:`trf` & RMBlast [*]_ on blast databases formatted with
 :ref:`builddatabase`.
 
+******************
+Installation
+******************
 
 ******************
 Program parameters
