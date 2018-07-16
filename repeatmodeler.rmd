@@ -1,12 +1,9 @@
-.. _repeatmodeler:
+---
+layout: page
+title: RepeatModeler
+---
 
-#############
-RepeatModeler
-#############
-
-RepeatModeler (`link <http://www.repeatmasker.org/RepeatModeler.html>`_)
-
-*version 1.08*
+## How to install RepeatModeler (`link <http://www.repeatmasker.org/RepeatModeler.html>`_) version 1.08
 
 *de novo* repeat family identification and modeling using RECON, RepeatScout,
 :ref:`trf` & RMBlast [*]_ on blast databases formatted with
