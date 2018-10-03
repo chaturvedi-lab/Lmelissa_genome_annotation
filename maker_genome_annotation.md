@@ -68,5 +68,10 @@ This script/command will create output folder and files with following extension
 
 **RepeatModeler creates this folder and files**
 A folder named RM_ will be created in your output directory. This folder will contain 5 subfolders labelled round1-round5. These folders will contain several output files. The main file which is the repeat library and should be used for downstream stuff is called consensi.fa.classified. This file will have a list of *identified* and *unknown repeats* found in the genome.
+A folder named RM_ will be created in your output directory. This folder will contain 5 subfolders labelled round1-round5. These folders will contain several output files. The main file which is the repeat library and should be used for downstream stuff is called *consensi.fa.classified*. This file will have a list of *identified* and *unknown repeats* found in the genome.
 
-#### 1. Filtering proteomes from repeats
+#### 2. Repeat masking or Full Repeat Annotation
+I used the *de novo* repeat library from RepeatModeler to mask repeats to avoid issues with RepBase.
+
+Here is the bash script I used for this:
+
