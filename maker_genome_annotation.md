@@ -777,6 +777,48 @@ cd interproscan-5.32-71.0
 
 The first test should create an output file with the default file name test_proteins.fasta.tsv, and the second would then create test_proteins.fasta_1.tsv (since the default filename already exists).
 
+I ran this on the protein output file from MAKER's second run. Here is the bash script for running interproscan:
+
+~~~
+cat runInterproscan.sh 
+#!/bin/bash
+#SBATCH -n 12 
+#SBATCH -N 1
+#SBATCH -t 300:00:00
+#SBATCH -p usubio-kp
+#SBATCH -A usubio-kp
+#SBATCH -J interpro
+
+module load python3
+
+cd /uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_melissa_genome/Annotation/maker/melissa_round2.maker.output/interproscan
+
+../../interproscan/interproscan-5.32-71.0/interproscan.sh -i ../melissa_round2.all.maker.proteins.fasta -f tsv -goterms -iprlookup -pathways
+~~~
+
+This creates an output tsv file. Here are the details of each column in the tsv file:
+
+1. Protein Accession (e.g. P51587)
+2. Sequence MD5 digest (e.g. 14086411a2cdf1c4cba63020e1622579)
+3. Sequence Length (e.g. 3418)
+4. Analysis (e.g. Pfam / PRINTS / Gene3D)
+5. Signature Accession (e.g. PF09103 / G3DSA:2.40.50.140)
+6. Signature Description (e.g. BRCA2 repeat profile)
+7. Start location
+8. Stop location
+9. Score - is the e-value (or score) of the match reported by member database method (e.g. 3.1E-52)
+10. Status - is the status of the match (T: true)
+11. Date - is the date of the run
+12. (InterPro annotations - accession (e.g. IPR002093) - optional column; only displayed if -iprlookup option is switched on)
+13. (InterPro annotations - description (e.g. BRCA2 repeat) - optional column; only displayed if -iprlookup option is switched on)
+14. (GO annotations (e.g. GO:0005515) - optional column; only displayed if --goterms option is switched on)
+15. (Pathways annotations (e.g. REACT_71) - optional column; only displayed if --pathways option is switched on)
+
+After I get the final tsv file, I used ipr_update_gff script from MAKER. This script takes InterproScan (iptrscan) output and maps domain IDs and GO terms to the Dbxref and Ontology_term attributes in the GFF3 file.
+
+~~~
+ipr_update_gff  melissa_round2.all.ids.gff interproscan/melissa_round2.all.maker.proteins.fasta.tsv > maker_ipr.txt
+~~~
 
 
 
