@@ -250,7 +250,7 @@ This creates three files (type ls to see):
 
 Control files are run specific and a separate set of control files will need to be generated for each genome annotated with MAKER. MAKER will look for control files in the current working directory, so it is recommended that MAKER be run in a separate directory containing unique control files for each genome.
 
-**ROUND 1 of MAKER**
+## 2. Round 1 of MAKER
 
 Here is the modified maker_opts.ctl file for running the first round of MAKER. I did not use any AUGUSTUS information for this round. I just ran this will default parameters by only providing the location of the genome, the transcriptome and the protein sequences from LepBase.
 
@@ -429,6 +429,8 @@ The datastore directory contains one set of output files for each contig/chromos
 
 Before proceeding to this, I copied the melissa_round1_master_datastore_index.log file to melissa_mod.log file and changed the directory of scaffold 1631 & 1638 and changed their status to finished. This is because I ran MAKER seperately on these two scaffolds as MAKER failed to run on these scaffolds. These folders are called 1631 and 1638 respectively and are present in the melissa_round1_datastore folder, alongwith all other scaffolds files. 
 
+## 3. Post-ROUND1 of MAKER
+
 So let's move into the directory containing that file and run those scripts.
 
 ~~~
@@ -440,11 +442,11 @@ gff3_merge -d melissa_mod.log
 
 Now you will se a number of new files that represent the merged output for the entire assembly.
 
-4. Training Gene Prediction Software
+## 4. Training Gene Prediction Software
 
 Besides mapping the empirical transcript and protein evidence to the reference genome and repeat annotation (not much of this in our example, given we've done so much up front), the most important product of this MAKER run is the gene models. These are what is used for training gene prediction software like augustus and snap.
 
-**SNAP**
+*SNAP*
 
 SNAP is pretty quick and easy to train. Issuing the following commands will perform the training. It is best to put some thought into what kind of gene models you use from MAKER. In this case, we use models with an AED of 0.25 or better and a length of 50 or more amino acids, which helps get rid of junky models. This is done in the folder: /uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_melissa_genome/Annotation/maker
 
@@ -473,7 +475,8 @@ cd ..
 #assemble the HMM
 hmm-assembler.pl melissa params > melissa_r1_length50_aed0.25.hmm
 ~~~
-**Augustus**
+
+*Augustus*
 
 I used the augustus training output from the BUSCO insecta run. I copied files from BUSCO folder to maker/augustus folder:
 
@@ -491,7 +494,7 @@ mv melissa_r1_maker*.gff ../../
 
 Finally, I had to copy the melissa specific files to the augustus config folder so that augustus can use these custom species details through MAKER. I asked Anita to create a lycaeides_melissa folder in the config/species folder for augustus and then asked her to copy the retraining files to the folder: /uufs/chpc.utah.edu/sys/installdir/augustus/3.3/config/species/lycaeides_melissa
 
-**ROUND 2 MAKER**
+## 5. Round 2 of MAKER
 Then I made the following changes:
 * In the maker_opts_round2.ctl file: change augustus_species to lycaeides_melissa
 * In maker_exe.ctl file: add the path to the agusutus executable: /uufs/chpc.utah.edu/sys/installdir/augustus/3.3/src/augustus
@@ -630,7 +633,149 @@ cd /uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_meliss
 maker -fix_nucleotides -base melissa_round2 maker_opts_round2.ctl maker_bopts.ctl maker_exe.ctl
 ~~~
 
+## 6. Post-round2 of MAKER
 
+#generate an id mapping file using maker_map_ids
+
+~~~
+maker_map_ids --prefix melissa_ melissa_round2.all.gff > melissa_round2.all.map
+~~~
+
+This creates a two-column tab-delimited file with the original id in column 1 and the new
+id in column 2. The --prefix is where you give your registered genome prefix; the value
+following --justify determines the length of the number following the prefix (make
+sure that you allow adequate places for the number of genes in the annotation set, e.g., if
+you have 10,000 genes, --justify should be set to at least 5.
+
+#use map file to change ids in gff3 and fasta file
+
+~~~
+cp melissa_round2.all.gff melissa_round2.all.ids.gff 
+map_gff_ids melissa_round2.all.map melissa_round2.all.ids.gff 
+map_fasta_ids melissa_round2.all.map melissa_round2.all.maker.proteins.fasta
+map_fasta_ids melissa_round2.all.map melissa_round2.all.maker.transcripts.fasta 
+~~~
+
+#assigning putative gene function using maker and NCBI BLAST+
+
+~~~
+mkdir uniprot
+#download the uniprot file from website (http://www.uniprot.org) to the desktop.Then copy it to the cluster.
+scp ./Downloads/uniprot_sprot.fasta.gz ssh u6007910@kingspeak.chpc.utah.edu:/uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_melissa_genome/Annotation/maker/melissa_round2.maker.output/uniprot
+~~~
+
+1. Index the UniProt/Swiss-Prot multi-FASTA file using makeblastdb:
+
+~~~
+makeblastdb -in uniprot/uniprot_sprot.fasta -input_type fasta -dbtype prot
+~~~
+
+This creates 3 files:
+* uniprot_sprot.fasta.phr 
+* uniprot_sprot.fasta.pin
+* uniprot_sprot.fasta.psq
+
+2. BLAST the MAKER-generated protein FASTA file to UniProt/SwissProt with
+BLASTP.
+
+~~~
+blastp -db uniprot/uniprot_sprot.fasta -query melissa_round2.all.maker.proteins.fasta -out maker2uni.blastp -evalue .000001 -outfmt 6 -num_alignments 1 -seg yes -soft_masking true -lcase_masking
+~~~
+
+Used the following bash script for this:
+
+~~~
+#!/bin/bash
+#SBATCH -n 12 
+#SBATCH -N 1
+#SBATCH -t 300:00:00
+#SBATCH -p usubio-kp
+#SBATCH -A usubio-kp
+#SBATCH -J maker
+
+module load maker
+
+cd /uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_melissa_genome/Annotation/maker/melissa_round2.maker.output
+
+blastp -db uniprot/uniprot_sprot.fasta -query melissa_round2.all.maker.proteins.fasta -out maker2uni.blastp -evalue .000001 -outfmt 6 -num_alignments 1 -seg yes -soft_masking true -lcase_masking
+~~~
+
+The key parts of this BLAST command line include the specification of the tabular format (-outfmt 6), and the -num_alignments 1.
+
+3. Add protein homology data to the MAKER GFF3 and FASTA files 
+
+~~~
+maker_functional_gff uniprot/uniprot_sprot.fasta maker2uni.blastp melissa_round2.all.ids.gff > melissa_functional_blast.gff
+maker_functional_fasta uniprot/uniprot_sprot.fasta maker2uni.blastp melissa_round2.all.maker.proteins.fasta > melissa_proteins_functional_blast.fasta
+~~~
+
+## INTERPROSCAN: Annotating using Interproscan
+
+1. Download and extract interproscan (https://github.com/ebi-pf-team/interproscan/wiki/HowToDownload) Also look at the how to install link on this page to see installations requirement.
+
+~~~
+mkdir interproscan
+cd interproscan
+wget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.32-71.0/interproscan-5.32-71.0-64-bit.tar.gz
+wget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.32-71.0/interproscan-5.32-71.0-64-bit.tar.gz.md5
+# Recommended checksum to confirm the download was successful:
+md5sum -c interproscan-5.32-71.0-64-bit.tar.gz.md5
+# Must return *interproscan-5.32-71.0-64-bit.tar.gz: OK*
+# If not - try downloading the file again as it may be a corrupted copy.
+~~~
+
+Extract the tar ball:
+
+~~~
+tar -pxvzf interproscan-5.32-71.0-*-bit.tar.gz
+
+# where:
+#     p = preserve the file permissions
+#     x = extract files from an archive
+#     v = verbosely list the files processed
+#     z = filter the archive through gzip
+#     f = use archive file
+~~~
+
+2. Installing Panther Models
+
+InterProScan 5 includes the Panther member database analysis.
+
+Before Installing Panther Data, first ensure you have extracted the distribution of InterProScan 5
+
+The path where this is extracted will be referred to below as [InterProScan5 home].
+
+*Download the Panther model data:*
+Download the latest Panther data files from the FTP site into the [InterProScan5 home]/data/ directory:
+
+~~~
+cd [InterProScan5 home]/data/
+
+wget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-12.0.tar.gz
+wget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-12.0.tar.gz.md5
+
+md5sum -c panther-data-12.0.tar.gz.md5
+# This must return *panther-data-12.0.tar.gz: OK*
+# If not - try downloading the file again as it may be a corrupted copy.
+~~~
+
+Extract the Panther data files to the required location:
+
+~~~
+tar -pxvzf panther-data-12.0.tar.gz
+~~~
+3. Running interproscan
+
+Testing if interproscan is running:
+
+~~~
+module load python3
+cd interproscan-5.32-71.0
+./interproscan.sh -i test_proteins.fasta -f tsv
+./interproscan.sh -i test_proteins.fasta -f tsv -dp
+~~~
+
+The first test should create an output file with the default file name test_proteins.fasta.tsv, and the second would then create test_proteins.fasta_1.tsv (since the default filename already exists).
 
 
 
