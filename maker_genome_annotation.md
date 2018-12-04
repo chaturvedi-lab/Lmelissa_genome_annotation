@@ -635,7 +635,7 @@ maker -fix_nucleotides -base melissa_round2 maker_opts_round2.ctl maker_bopts.ct
 
 ## 6. Post-round2 of MAKER
 
-#generate an id mapping file using maker_map_ids
+Generate an id mapping file using maker_map_ids:
 
 ~~~
 maker_map_ids --prefix melissa_ melissa_round2.all.gff > melissa_round2.all.map
