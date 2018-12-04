@@ -633,7 +633,7 @@ cd /uufs/chpc.utah.edu/common/home/gompert-group1/data/lycaeides/dovetail_meliss
 maker -fix_nucleotides -base melissa_round2 maker_opts_round2.ctl maker_bopts.ctl maker_exe.ctl
 ~~~
 
-## 6. Post-round2 of MAKER
+## 6. Post-Round 2 of MAKER
 
 Generate an id mapping file using maker_map_ids:
 
