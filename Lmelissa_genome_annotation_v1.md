@@ -1,3 +1,5 @@
+THIS IS THE GENOME ANNOTATION PIPELINE FOR LYCAEIDES MELISSA GENOME PUBLISHED IN CHATURVEDI ET AL. 2020, NATURE COMMUNICATIONS.
+
 # Genome Annotation using MAKER
 
 [MAKER](http://www.yandell-lab.org/software/maker.html) is a great tool for annotating a reference genome using empirical and *ab initio* gene predictions. [GMOD](http://gmod.org/wiki/Main_Page), the umbrella organization that includes MAKER, has some nice tutorials online for running MAKER. However, these were quite simplified examples and it took a bit of effort to wrap my head completely around everything. In addition, there are several pre-processing steps which need to be followed before working on the MAKER pipeline. Here I is my description of a *de novo* genome annotation for *Lycaeides melissa* in detail, so that there is a record and that it is easy to use this as a guide to annotate any genome. In addition, this can be referred to as a reseource for finding great resources for tutorials on installations and running sample datasets. 
