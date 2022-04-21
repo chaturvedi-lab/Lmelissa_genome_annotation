@@ -1,7 +1,7 @@
 # Genome-annotation
 This folder contains working pipeline and scripts to do genome annotation.
 
-**maker_genome_annotation.md** describes a pipeline to do genome annotation using MAKER.
+**Lmelissa_genome_annotation_v1.md** describes a pipeline to do genome annotation using MAKER. This is the pipeline used for the previous version of the genome published in the Nature Communications paper.
 
 **SNP_annotation.md** describes a pipeline to annotation a SNP dataset with information from MAKER genome annotation.
 
