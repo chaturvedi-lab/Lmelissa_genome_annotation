@@ -1,5 +1,9 @@
 # Genome-annotation
 This folder contains working pipeline and scripts to do genome annotation.
+UPDATED PIPELINE (MAY 11, 2026). 
+**revised_lmelissa_genome_annotation_pipeline_markdown.md** is the updated pipeline which uses BRAKER3 for genome annotation. This annotation is used in the manuscript "Genomic forecasts of maladptation in Lycaeides butterflies" by Kenen B. Goodwin, Samridhi Chaturvedi, Lauren K. Lucas, and Zachariah Gompert (2026).
+
+**snp_func_annot.py** takes the annotation file and a list of SNPs with scaffold and positions and creates a functional annotation file for the SNPs for downstream analyses. 
 
 **Lmelissa_genome_annotation_v1.md** describes a pipeline to do genome annotation using MAKER. This is the pipeline used for the previous version of the genome published in the Nature Communications paper.
 
