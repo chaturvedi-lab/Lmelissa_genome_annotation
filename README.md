@@ -5,9 +5,9 @@ UPDATED PIPELINE (MAY 11, 2026).
 
 **revised_lmelissa_genome_annotation_pipeline_markdown.md** is the updated pipeline which uses BRAKER3 for genome annotation. This annotation is used in the manuscript "Genomic forecasts of maladptation in Lycaeides butterflies" by Kenen B. Goodwin, Samridhi Chaturvedi, Lauren K. Lucas, and Zachariah Gompert (2026).
 
-**func_annotation** folder contains script to perform functional annotations
+**functional_annot** folder contains script to perform functional annotations
 
-**struct_annotation** folder contains script to perform structural annotations
+**structural_annot** folder contains script to perform structural annotations
 
 **older_maker_annotation** folder contains older versions of the pipeline and scripts as described below:
 **Lmelissa_genome_annotation_v1.md** describes a pipeline to do genome annotation using MAKER. This is the pipeline used for the previous version of the genome published in the Nature Communications paper.
